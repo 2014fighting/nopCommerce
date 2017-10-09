@@ -239,7 +239,7 @@ namespace Nop.Plugin.Payments.Square
 
             //whether to save card details for the future purchasing
             var saveCardKey = _localizationService.GetResource("Plugins.Payments.Square.Fields.SaveCard.Key");
-            if (paymentRequest.CustomValues.TryGetValue(saveCardKey, out object saveCardValue) && saveCardValue is bool saveCard && saveCard)
+            if (paymentRequest.CustomValues.TryGetValue(saveCardKey, out object saveCardValue) && saveCardValue is bool saveCard && saveCard && !customer.IsGuest())
             {
                 //remove the value from payment custom values, since it is no longer needed
                 paymentRequest.CustomValues.Remove(saveCardKey);
@@ -553,7 +553,7 @@ namespace Nop.Plugin.Payments.Square
             if (form.TryGetValue("StoredCardId", out StringValues storedCardId) && !StringValues.IsNullOrEmpty(storedCardId) && !storedCardId.Equals("0"))
                 paymentRequest.CustomValues.Add(_localizationService.GetResource("Plugins.Payments.Square.Fields.StoredCard.Key"), storedCardId.ToString());
 
-            if (form.TryGetValue("SaveCard", out StringValues saveCardValue) && !StringValues.IsNullOrEmpty(storedCardId) && bool.TryParse(saveCardValue[0], out bool saveCard) && saveCard)
+            if (form.TryGetValue("SaveCard", out StringValues saveCardValue) && !StringValues.IsNullOrEmpty(saveCardValue) && bool.TryParse(saveCardValue[0], out bool saveCard) && saveCard)
                 paymentRequest.CustomValues.Add(_localizationService.GetResource("Plugins.Payments.Square.Fields.SaveCard.Key"), saveCard);
 
             if (form.TryGetValue("PostalCode", out StringValues postalCode) && !StringValues.IsNullOrEmpty(postalCode))
@@ -630,7 +630,8 @@ namespace Nop.Plugin.Payments.Square
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.SaveCard.Key", "Save card details");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard", "Use a previously saved card");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.Key", "Pay using stored card token");
-            this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.NotExist", "No cards saved");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.Mask", "*{0}");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.SelectCard", "Select a card");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.TransactionMode", "Transaction mode");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Fields.TransactionMode.Hint", "Choose the transaction mode.");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Square.Instructions", @"
@@ -696,7 +697,8 @@ namespace Nop.Plugin.Payments.Square
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.SaveCard.Key");
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard");
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.Key");
-            this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.NotExist");
+            this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.Mask");
+            this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.StoredCard.SelectCard");
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.TransactionMode");
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Fields.TransactionMode.Hint");
             this.DeletePluginLocaleResource("Plugins.Payments.Square.Instructions");

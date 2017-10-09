@@ -97,9 +97,12 @@ namespace Nop.Plugin.Payments.Square.Controllers
                     .Select(location => new SelectListItem { Text = location.BusinessName, Value = location.Id }).ToList();
             }
 
-            //add special item for 'there are no location' with value 0
-            var noLocationText = _localizationService.GetResource("Plugins.Payments.Square.Fields.Location.NotExist");
-            model.Locations.Insert(0, new SelectListItem { Text = noLocationText, Value = "0" });
+            //add the special item for 'there are no location' with value 0
+            if (!model.Locations.Any())
+            {
+                var noLocationText = _localizationService.GetResource("Plugins.Payments.Square.Fields.Location.NotExist");
+                model.Locations.Add(new SelectListItem { Text = noLocationText, Value = "0" });
+            }
 
             //get access token renewal period in days
             var task = _scheduleTaskService.GetTaskByType(SquarePaymentDefaults.RenewAccessTokenTask);

@@ -28,17 +28,6 @@
     }
 </style>
 
-<table width="100%" cellspacing="2" cellpadding="1" border="0">
-    <tr>
-        <td>
-            <label asp-for="StoredCardId">@T("Plugins.Payments.Square.Fields.StoredCard"):</label>
-        </td>
-        <td>
-            <select asp-for="StoredCardId" asp-items="Model.StoredCards" class="square-input"></select>
-        </td>
-    </tr>
-</table>
-
 <script type="text/javascript">
     $(document).ready(function () {
         $('#@Html.IdFor(model => model.StoredCardId)').change(toggleStoredCard);
@@ -137,6 +126,20 @@
 <input type="hidden" asp-for="CardNonce">
 <input type="hidden" asp-for="Errors">
 
+@if (!Model.IsGuest && Model.StoredCards.Any())
+{
+    <table width="100%" cellspacing="2" cellpadding="1" border="0">
+        <tr>
+            <td>
+                <label asp-for="StoredCardId">@T("Plugins.Payments.Square.Fields.StoredCard"):</label>
+            </td>
+            <td>
+                <select asp-for="StoredCardId" asp-items="Model.StoredCards" class="square-input"></select>
+            </td>
+        </tr>
+    </table>
+}
+
 @*These div elements are the placeholder elements that are replaced by the SqPaymentForm's iframes.*@
 <table width="100%" cellspacing="2" cellpadding="1" border="0" id="square-card-details">
     <tr>
@@ -171,13 +174,16 @@
             <div id="square-postal-code"></div>
         </td>
     </tr>
-    <tr>
-        <td>
-            <label asp-for="SaveCard">@T("Plugins.Payments.Square.Fields.SaveCard"):</label>
-        </td>
-        <td>
-            <input type="checkbox" asp-for="SaveCard" />
-            <span asp-validation-for="SaveCard"></span>
-        </td>
-    </tr>
+    @if (!Model.IsGuest)
+    {
+        <tr>
+            <td>
+                <label asp-for="SaveCard">@T("Plugins.Payments.Square.Fields.SaveCard"):</label>
+            </td>
+            <td>
+                <input type="checkbox" asp-for="SaveCard" />
+                <span asp-validation-for="SaveCard"></span>
+            </td>
+        </tr>
+    }
 </table>

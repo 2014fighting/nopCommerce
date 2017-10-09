@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
+using Nop.Core.Domain.Customers;
 using Nop.Plugin.Payments.Square.Models;
 using Nop.Plugin.Payments.Square.Services;
 using Nop.Services.Common;
@@ -38,7 +39,10 @@ namespace Nop.Plugin.Payments.Square.Components
         public IViewComponentResult Invoke()
         {
             var model = new PaymentInfoModel();
-            
+
+            //whether current customer is guest
+            model.IsGuest = _workContext.CurrentCustomer.IsGuest();
+
             //get postal code from the billing address or from the shipping one
             model.PostalCode = _workContext.CurrentCustomer.BillingAddress?.ZipPostalCode 
                 ?? _workContext.CurrentCustomer.ShippingAddress?.ZipPostalCode;
@@ -47,11 +51,17 @@ namespace Nop.Plugin.Payments.Square.Components
             var customerId = _workContext.CurrentCustomer.GetAttribute<string>(SquarePaymentDefaults.CustomerIdAttribute);
             var customer = _squarePaymentManager.GetCustomer(customerId);
             if (customer?.Cards != null)
-                model.StoredCards = customer.Cards.Select(card => new SelectListItem { Text = card.Last4, Value = card.Id }).ToList();
+            {
+                var cardNumberMask = _localizationService.GetResource("Plugins.Payments.Square.Fields.StoredCard.Mask");
+                model.StoredCards = customer.Cards.Select(card => new SelectListItem { Text = string.Format(cardNumberMask, card.Last4), Value = card.Id }).ToList();
+            }
 
-            //add special item for 'there are no cards' with value 0
-            var noCardText = _localizationService.GetResource("Plugins.Payments.Square.Fields.StoredCard.NotExist");
-            model.StoredCards.Insert(0, new SelectListItem { Text = noCardText, Value = "0" });
+            //add the special item for 'select card' with value 0
+            if (model.StoredCards.Any())
+            {
+                var selectCardText = _localizationService.GetResource("Plugins.Payments.Square.Fields.StoredCard.SelectCard");
+                model.StoredCards.Insert(0, new SelectListItem { Text = selectCardText, Value = "0" });
+            }
 
             return View("~/Plugins/Payments.Square/Views/PaymentInfo.cshtml", model);
         }

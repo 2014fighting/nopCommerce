@@ -36,23 +36,20 @@
                         <span asp-validation-for="ApplicationSecret"></span>
                     </div>
                 </div>
-                @if (!string.IsNullOrEmpty(Model.AccessToken))
-                {
-                    <div class="form-group">
-                        <div class="col-md-3">
-                            <nop-label asp-for="LocationId" />
-                        </div>
-                        <div class="col-md-9">
-                            <div class="input-group input-group-required">
-                                <nop-select asp-for="LocationId" asp-items="Model.Locations" />
-                                <div class="input-group-btn">
-                                    <nop-required/>
-                                </div>
-                            </div>                            
-                            <span asp-validation-for="LocationId"></span>
-                        </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="LocationId" />
                     </div>
-                }
+                    <div class="col-md-9">
+                        <div class="input-group input-group-required">
+                            <nop-select asp-for="LocationId" asp-items="Model.Locations" />
+                            <div class="input-group-btn">
+                                <nop-required/>
+                            </div>
+                        </div>                            
+                        <span asp-validation-for="LocationId"></span>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="col-md-3">
                         <nop-label asp-for="AccessToken" />

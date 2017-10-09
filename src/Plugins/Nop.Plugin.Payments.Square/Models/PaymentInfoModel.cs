@@ -18,6 +18,8 @@ namespace Nop.Plugin.Payments.Square.Models
 
         #region Properties
 
+        public bool IsGuest { get; set; }
+
         public string CardNonce { get; set; }
         public string Errors { get; set; }
 

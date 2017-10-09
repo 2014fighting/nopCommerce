@@ -22,6 +22,8 @@ namespace Nop.Plugin.Payments.Worldpay.Models
 
         #region Properties
 
+        public bool IsGuest { get; set; }
+
         public string CardNumber { get; set; }
 
         public string CardCode { get; set; }

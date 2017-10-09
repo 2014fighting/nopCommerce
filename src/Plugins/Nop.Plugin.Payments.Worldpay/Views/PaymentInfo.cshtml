@@ -29,8 +29,7 @@
                         'email': '@workContext.CurrentCustomer.BillingAddress?.Email',
                         'firstName': '@workContext.CurrentCustomer.BillingAddress?.FirstName',
                         'lastName': '@workContext.CurrentCustomer.BillingAddress?.LastName',
-            @{
-                if (worldpayPaymentSettings.ValidateAddress)
+                @if (worldpayPaymentSettings.ValidateAddress)
                 {
                     <text>
                         'address':
@@ -45,8 +44,6 @@
                         }
                     </text>
                 }
-            }
-
                     },
                     'developerApplication':
                     {
@@ -100,16 +97,19 @@
 <input type="hidden" asp-for="Token">
 <input type="hidden" asp-for="Errors">
 
-<table width="100%" cellspacing="2" cellpadding="1" border="0">
-    <tr>
-        <td>
-            <label asp-for="StoredCardId">@T("Plugins.Payments.Worldpay.Fields.StoredCard"):</label>
-        </td>
-        <td>
-            <select asp-for="StoredCardId" asp-items="Model.StoredCards" class="dropdownlists"></select>
-        </td>
-    </tr>
-</table>
+@if (!Model.IsGuest && Model.StoredCards.Any())
+{
+    <table width="100%" cellspacing="2" cellpadding="1" border="0">
+        <tr>
+            <td>
+                <label asp-for="StoredCardId">@T("Plugins.Payments.Worldpay.Fields.StoredCard"):</label>
+            </td>
+            <td>
+                <select asp-for="StoredCardId" asp-items="Model.StoredCards" class="dropdownlists"></select>
+            </td>
+        </tr>
+    </table>
+}
 
 <table width="100%" cellspacing="2" cellpadding="1" border="0" id="worldpay-card-details">
     <tr>
@@ -140,13 +140,16 @@
             <span asp-validation-for="CardCode"></span>
         </td>
     </tr>
-    <tr>
-        <td>
-            <label asp-for="SaveCard">@T("Plugins.Payments.Worldpay.Fields.SaveCard"):</label>
-        </td>
-        <td>
-            <input type="checkbox" asp-for="SaveCard" />
-            <span asp-validation-for="SaveCard"></span>
-        </td>
-    </tr>
+    @if (!Model.IsGuest)
+    {
+        <tr>
+            <td>
+                <label asp-for="SaveCard">@T("Plugins.Payments.Worldpay.Fields.SaveCard"):</label>
+            </td>
+            <td>
+                <input type="checkbox" asp-for="SaveCard" />
+                <span asp-validation-for="SaveCard"></span>
+            </td>
+        </tr>
+    }
 </table>

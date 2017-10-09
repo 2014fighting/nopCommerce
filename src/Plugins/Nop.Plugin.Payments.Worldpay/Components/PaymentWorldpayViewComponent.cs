@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
+using Nop.Core.Domain.Customers;
 using Nop.Plugin.Payments.Worldpay.Models;
 using Nop.Plugin.Payments.Worldpay.Services;
 using Nop.Services.Localization;
@@ -52,6 +53,9 @@ namespace Nop.Plugin.Payments.Worldpay.Components
                 model.ExpireMonths.Add(new SelectListItem { Text = i.ToString("D2"), Value = i.ToString(), });
             }
 
+            //whether current customer is guest
+            model.IsGuest = _workContext.CurrentCustomer.IsGuest();
+
             //whether customer already has stored cards
             var customer = _worldpayPaymentManager.GetCustomer(_workContext.CurrentCustomer.CustomerGuid.ToString());
             if (customer?.PaymentMethods != null)
@@ -60,9 +64,12 @@ namespace Nop.Plugin.Payments.Worldpay.Components
                     .Select(method => new SelectListItem { Text = method.Card.MaskedNumber, Value = method.PaymentId }).ToList();
             }
 
-            //add special item for 'there are no cards' with empty GUID value 
-            var noCardText = _localizationService.GetResource("Plugins.Payments.Worldpay.Fields.StoredCard.NotExist");
-            model.StoredCards.Insert(0, new SelectListItem { Text = noCardText, Value = Guid.Empty.ToString() });
+            //add the special item for 'select card' with empty GUID value 
+            if (model.StoredCards.Any())
+            {
+                var selectCardText = _localizationService.GetResource("Plugins.Payments.Worldpay.Fields.StoredCard.SelectCard");
+                model.StoredCards.Insert(0, new SelectListItem { Text = selectCardText, Value = Guid.Empty.ToString() });
+            }
 
             return View("~/Plugins/Payments.Worldpay/Views/PaymentInfo.cshtml", model);
         }

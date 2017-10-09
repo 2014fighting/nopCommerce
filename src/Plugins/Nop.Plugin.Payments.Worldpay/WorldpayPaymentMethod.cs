@@ -157,6 +157,15 @@ namespace Nop.Plugin.Payments.Worldpay
             var amount = _currencyService.ConvertFromPrimaryStoreCurrency(paymentRequest.OrderTotal, usdCurrency);
             request.Amount = Math.Round(amount, 2);
 
+            //get current shopping cart
+            var shoppingCart = customer.ShoppingCartItems
+                .Where(shoppingCartItem => shoppingCartItem.ShoppingCartType == ShoppingCartType.ShoppingCart)
+                .LimitPerStore(paymentRequest.StoreId).ToList();
+
+            //whether there are non-downloadable items in the shopping cart
+            var nonDownloadable = shoppingCart.Any(item => !item.Product.IsDownload);
+            request.ExtendedInformation.GoodsType = nonDownloadable ? GoodsType.Physical : GoodsType.Digital;
+
             //try to get previously stored card details
             var storedCardKey = _localizationService.GetResource("Plugins.Payments.Worldpay.Fields.StoredCard.Key");
             if (paymentRequest.CustomValues.TryGetValue(storedCardKey, out object storedCardId) && !storedCardId.ToString().Equals(Guid.Empty.ToString()))
@@ -182,7 +191,7 @@ namespace Nop.Plugin.Payments.Worldpay
 
             //whether to save card details for the future purchasing
             var saveCardKey = _localizationService.GetResource("Plugins.Payments.Worldpay.Fields.SaveCard.Key");
-            if (paymentRequest.CustomValues.TryGetValue(saveCardKey, out object saveCardValue) && saveCardValue is bool saveCard && saveCard)
+            if (paymentRequest.CustomValues.TryGetValue(saveCardKey, out object saveCardValue) && saveCardValue is bool saveCard && saveCard && !customer.IsGuest())
             {
                 //remove the value from payment custom values, since it is no longer needed
                 paymentRequest.CustomValues.Remove(saveCardKey);
@@ -201,7 +210,7 @@ namespace Nop.Plugin.Payments.Worldpay
                             LastName = customer.GetAttribute<string>(SystemCustomerAttributeNames.LastName),
                             Company = customer.GetAttribute<string>(SystemCustomerAttributeNames.Company),
                             Phone = customer.GetAttribute<string>(SystemCustomerAttributeNames.Phone),
-                            BillingAddress = new Domain.Models.Address
+                            BillingAddress = new Address
                             {
                                 Line1 = customer.BillingAddress?.Address1,
                                 City = customer.BillingAddress?.City,
@@ -503,7 +512,7 @@ namespace Nop.Plugin.Payments.Worldpay
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.SecureNetId.Hint", "Specify the SecureNet ID. You will get this in an email shortly after signing up for your account.");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard", "Use a previously saved card");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.Key", "Pay using stored card token");
-            this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.NotExist", "No cards saved");
+            this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.SelectCard", "Select a card");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.Token.Key", "Pay using card token");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.TransactionMode", "Transaction mode");
             this.AddOrUpdatePluginLocaleResource("Plugins.Payments.Worldpay.Fields.TransactionMode.Hint", "Choose the transaction mode.");
@@ -564,7 +573,7 @@ namespace Nop.Plugin.Payments.Worldpay
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.SecureNetId.Hint");
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard");
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.Key");
-            this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.NotExist");
+            this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.StoredCard.SelectCard");
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.Token.Key");
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.TransactionMode");
             this.DeletePluginLocaleResource("Plugins.Payments.Worldpay.Fields.TransactionMode.Hint");
